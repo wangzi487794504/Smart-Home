@@ -1,0 +1,77 @@
+C51 COMPILER V9.01   SHOU                                                                  05/21/2020 18:25:15 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE SHOU
+OBJECT MODULE PLACED IN shou.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE shou.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          # include <reg51.h>
+   2          # include <intrins.h>
+   3          # include "shou.h"
+   4          # include "delay.h"
+   5          # include "1602.h"
+   6          # include "dht11.h"
+   7          # include "wifi.h"
+   8          # include"yidi.h"
+   9          unsigned int temp[2],humi[2];
+  10          unsigned char str[8];
+  11          void datashow() //数据处理函数，这里我写错了，wifi的第一格是是温度，我给了湿度，所以要倒着写
+  12          {                                       //傻逼了我          
+  13   1              unsigned char temp_buf[2],humi_buf[2];
+  14   1              unsigned yu; 
+  15   1              receive(temp,humi);//接收dht11的数据
+  16   1              yu=panduanyu();//检测雨滴的状态
+  17   1              temp_buf[0]=temp[0]/10+0x30;//asc 0开始为16进制0x30,十进制48    
+  18   1              temp_buf[1]=temp[0]%10+0x30;
+  19   1              humi_buf[0]=humi[0]/10+0x30;    
+  20   1              humi_buf[1]=humi[0]%10+0x30;
+  21   1              str[0]=temp_buf[0];
+  22   1              str[1]=temp_buf[1];
+  23   1              str[2]=44;      //逗号的asc为44
+  24   1              str[3]=humi_buf[0];             
+  25   1              str[4]=humi_buf[1];
+  26   1              str[5]=44;
+  27   1              str[6]=yu%10+0x30;
+  28   1              ESP8266_SendData(str);
+  29   1              
+  30   1              lcd_init();
+  31   1              write_cmd(0x85);        
+  32   1              display(0x00,'S');//LCD的第一行显示 
+  33   1              display(0x01,'h');//LCD的第一行显示
+  34   1              display(0x02,'i');//LCD的第一行显示
+  35   1              display(0x03,'D');//LCD的第一行显示
+  36   1              display(0x04,'u');//LCD的第一行显示
+  37   1          display(0x05,':'); 
+  38   1              display(0x06,temp_buf[0]); 
+  39   1          display(0x07,temp_buf[1]); 
+  40   1              display(0X08,'%'); 
+  41   1              display(0x40,'W');//LCD的第二行显示 
+  42   1              display(0x41,'e');//LCD的第二行显示 
+  43   1              display(0x42,'n');//LCD的第二行显示
+  44   1              display(0x43,'D');//LCD的第二行显示
+  45   1              display(0x44,'u');//LCD的第二行显示 
+  46   1              display(0x45,':'); 
+  47   1              display(0x46,humi_buf[0]);      
+  48   1              display(0x47,humi_buf[1]); 
+  49   1          display(0x48,0xdf);//以下两个是温度单位的处理，查ASI表， 
+  50   1          display(0x49,0x43);
+  51   1              delay(5000);//每五秒更新一次数据 
+  52   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.01   SHOU                                                                  05/21/2020 18:25:15 PAGE 2   
+
+   CODE SIZE        =    277    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     16       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

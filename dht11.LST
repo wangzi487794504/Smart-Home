@@ -1,0 +1,108 @@
+C51 COMPILER V9.01   DHT11                                                                 05/21/2020 18:25:15 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DHT11
+OBJECT MODULE PLACED IN dht11.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE dht11.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          //**************************dht11测试某块*************************************// 
+   2          # include <reg51.h>
+   3          # include <intrins.h>
+   4          # include "delay.h"
+   5          # include "dht11.h"
+   6          typedef unsigned char uint8;
+   7          typedef unsigned int uint16;
+   8          #define uchar unsigned char 
+   9          //unsigned char RH,RL,TH,TL;
+  10          sbit io=P1^0;//dht11data端接单片机的P1^0口//
+  11          uchar data_byte;  
+  12          void start()//开始信号 
+  13          
+  14          { 
+  15   1      
+  16   1        io=1; 
+  17   1        delay1(); 
+  18   1        io=0; 
+  19   1        delay(25);// 主机把总线拉低必须大于18ms保证DHT11能检测到起始信号 
+  20   1        io=1;    //发送开始信号结束后拉高电平延时20-40us 
+  21   1        delay1();
+  22   1        delay1(); 
+  23   1        delay1(); 
+  24   1      
+  25   1      } 
+  26          
+  27           
+  28          
+  29          uchar receive_byte()//接收一个字节// 
+  30          
+  31          { 
+  32   1      
+  33   1        uchar i,temp; 
+  34   1      
+  35   1        for(i=0;i<8;i++)//接收8bit的数据 
+  36   1      
+  37   1        { 
+  38   2      
+  39   2              while(!io); 
+  40   2              delay1();//延时函数 
+  41   2               delay1(); 
+  42   2              delay1(); 
+  43   2              temp=0;//表示接收的为数据'0' 
+  44   2              if(io==1) 
+  45   2               temp=1; //则表示接收的数据为'1' 
+  46   2          while(io);//等待数据信号高电平 
+  47   2              data_byte<<=1;//接收的数据为高位在前右移 
+  48   2               data_byte|=temp; 
+  49   2        } 
+  50   1        return data_byte; 
+  51   1      } 
+  52          void receive(uint16 R[2],uint16 T[2])//接收数据// 
+  53          { 
+  54   1        uchar T_H,T_L,R_H,R_L,check,num_check,i; 
+  55   1        start();//开始信号// 
+C51 COMPILER V9.01   DHT11                                                                 05/21/2020 18:25:15 PAGE 2   
+
+  56   1        io=1;   //主机设为输入判断从机DHT11响应信号 
+  57   1        if(!io)//判断从机是否有低电平响应信号// 
+  58   1        {  
+  59   2              while(!io);//判断从机发出 80us 的低电平响应信号是否结束// 
+  60   2              while(io);//判断从机发出 80us 的高电平是否结束如结束则主机进入数据接收状态 
+  61   2              R_H=receive_byte();//湿度高位 
+  62   2              R_L=receive_byte();//湿度低位 
+  63   2              T_H=receive_byte();//温度高位 
+  64   2              T_L=receive_byte();//温度低位 
+  65   2              check=receive_byte();//校验位
+  66   2              io=0; //当最后一bit数据接完毕后从机拉低电平50us// 
+  67   2              for(i=0;i<7;i++)//差不多50us的延时 
+  68   2              delay1(); 
+  69   2              io=1;//总线由上拉电阻拉高进入空闲状态 
+  70   2              num_check=R_H+R_L+T_H+T_L; 
+  71   2              if(num_check==check)//判断读到的四个数据之和是否与校验位相同 
+  72   2              { 
+  73   3              R[0]=R_H; 
+  74   3              R[1]=R_L; 
+  75   3              T[0]=T_H;
+  76   3              T[1]=T_L;
+  77   3         check=num_check; 
+  78   3              } 
+  79   2        } 
+  80   1      
+  81   1      } 
+  82          
+  83          //*****************************************************************************
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    223    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1      14
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

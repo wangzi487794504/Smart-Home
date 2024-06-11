@@ -1,0 +1,134 @@
+C51 COMPILER V9.01   1602                                                                  05/21/2020 18:25:14 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE 1602
+OBJECT MODULE PLACED IN 1602.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE 1602.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          # include <reg51.h>
+   2          # include <intrins.h>
+   3          # include"1602.h"
+   4          # include "delay.h"
+   5          //lcd模块// 
+   6          sbit rw=P2^5;//一下三行是设置lcd1602的使能端// 
+   7          #define uint unsigned int 
+   8          #define uchar unsigned char 
+   9          sbit rs=P2^6; 
+  10          typedef bit BOOL;//此声明一个布尔型变量即真或假// 
+  11          sbit ep=P2^7; 
+  12          
+  13          bit lcd_bz()//测试lcd忙碌状态返回值为布尔型数值真或假'1'.'0'  
+  14          
+  15          { 
+  16   1        bit puanduan;
+  17   1        rs=0;           // 读忙信号
+  18   1        rw=1;
+  19   1        ep=1;
+  20   1        _nop_();
+  21   1        _nop_();
+  22   1        _nop_();
+  23   1        _nop_();
+  24   1        puanduan = (bit)(P0&0x80);
+  25   1        ep=0;
+  26   1        return puanduan ;
+  27   1      
+  28   1      }     
+  29          
+  30          void write_cmd(uchar cmd)//写指令// 
+  31          
+  32          { 
+  33   1      
+  34   1        while (lcd_bz());
+  35   1        rs=0;
+  36   1        rw=0;
+  37   1        ep=0;
+  38   1        _nop_();
+  39   1        _nop_();
+  40   1        P0=cmd ;
+  41   1        _nop_();
+  42   1        _nop_();
+  43   1        _nop_();
+  44   1        ep=1;
+  45   1        _nop_();
+  46   1        _nop_();
+  47   1        _nop_();
+  48   1        _nop_();
+  49   1        ep=0;
+  50   1      
+  51   1      } 
+  52          void write_addr(uchar addr)//写地址// 
+  53          
+  54          { 
+  55   1      
+C51 COMPILER V9.01   1602                                                                  05/21/2020 18:25:14 PAGE 2   
+
+  56   1        write_cmd(addr|0x80);//LCD第一行的首地址为0x80第二行的首地址为0x80+0x40=0xc0 
+  57   1      
+  58   1      } 
+  59          
+  60           
+  61          
+  62          void write_byte(uchar dat) //写字节// 
+  63          
+  64          { 
+  65   1      
+  66   1         while (lcd_bz());
+  67   1        rs=1;
+  68   1        rw=0;
+  69   1        ep=0;
+  70   1        _nop_();
+  71   1        _nop_();
+  72   1        P0=dat ;
+  73   1        _nop_();
+  74   1        _nop_();
+  75   1        _nop_();
+  76   1        _nop_();
+  77   1        ep=1;
+  78   1        _nop_();
+  79   1        _nop_();
+  80   1        _nop_();
+  81   1        ep=0;
+  82   1      
+  83   1      } 
+  84          void display(uchar addr,uchar q)//在某一地址上显示内容adder表示的是地址偏移量q表示显示的字符或数字
+  85          
+  86          { 
+  87   1        delay_h(10);  
+  88   1         write_addr(addr); 
+  89   1        write_byte(q); 
+  90   1        delay_h(1);//修改此时间可以改变LCD上数值跳变的数度 
+  91   1      } 
+  92          void lcd_init() //lcd初始化// 
+  93          
+  94          { 
+  95   1      
+  96   1        write_cmd(0x38);//设置LCD两行显示
+  97   1        delay_h(1); 
+  98   1        write_cmd(0x0c);//清除屏幕显示 
+  99   1        delay_h(1); 
+ 100   1        write_cmd(0x06);//设定输入方式增量不移位 
+ 101   1        delay_h(1); 
+ 102   1        write_cmd(0x01);//不闪烁 
+ 103   1        delay_h(1); 
+ 104   1      
+ 105   1      } 
+ 106          
+ 107          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    143    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+C51 COMPILER V9.01   1602                                                                  05/21/2020 18:25:14 PAGE 3   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
